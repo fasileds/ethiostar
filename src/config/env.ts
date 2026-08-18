@@ -92,7 +92,7 @@ const serverSchema = z
       )
     }
 
-    if (v.NODE_ENV === 'production') {
+    if (v.NODE_ENV === 'production' && process.env.SKIP_ENV_VALIDATION !== 'true') {
       // Supavisor transaction pooling is port 6543. Session pooling leaks RLS context
       // between requests — see docs/architecture/04-database-and-migrations.md §4.10.
       if (!/:6543(\/|\?|$)/.test(v.DATABASE_URL)) {

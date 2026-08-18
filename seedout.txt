@@ -1,0 +1,138 @@
+
+> ethiostart@0.1.0 seed:demo
+> node --env-file-if-exists=.env.local node_modules/tsx/dist/cli.mjs --conditions=react-server db/seeds/index.ts --demo
+
+▸ 010-permissions
+
+✖ Seeding failed — the transaction was rolled back.
+
+DrizzleQueryError: Failed query: 
+      insert into public.permission
+        (id, code, resource, action, description, group_code, is_read_only, created_by)
+      values (
+        $1, $2, $3, $4,
+        $5, $6, $7, $8
+      )
+      on conflict (code) do update set
+        resource     = excluded.resource,
+        action       = excluded.action,
+        description  = excluded.description,
+        group_code   = excluded.group_code,
+        is_read_only = excluded.is_read_only,
+        updated_at   = now()
+      returning (xmax = 0) as was_inserted
+    
+params: 01a00fed-9a47-7812-8257-7db00441a99b,customer_application:view,customer_application,view,View customer applications,onboarding,true,00000000-0000-7000-8000-000000000000
+    at PostgresJsPreparedQuery.queryWithCache (C:\Users\Admi n\my-project\ethiostart\node_modules\src\pg-core\session.ts:73:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.seedPermissions (C:\Users\Admi n\my-project\ethiostart\db\seeds\010-permissions.ts:28:20)
+    at async <anonymous> (C:\Users\Admi n\my-project\ethiostart\db\seeds\index.ts:86:9)
+    at async scope (C:\Users\Admi n\my-project\ethiostart\node_modules\postgres\cjs\src\index.js:260:18)
+    at async Function.begin (C:\Users\Admi n\my-project\ethiostart\node_modules\postgres\cjs\src\index.js:243:14)
+    at as  [900-demo] customers: 8 (statuses: ACTIVE x6, SUSPENDED x1, CLOSED x1)
+  [900-demo] standalone applications: 6 (one per non-approved status)
+  [900-demo] portal users: 3
+  [900-demo] branch standard tariff: 4 service lines
+  [900-demo] contracts: 7 (DRAFT/ACTIVE x3/EXPIRED/TERMINATED); Limu Kossa has none
+  [900-demo] DEBUG pre-insert cns-abyssinia-closed:receipt {"id":"161575a0-3552-7660-b3e7-0fd0f66a2253","lotId":"b9b64702-f8db-7fd6-8683-255bf5061a06","locationId":"46253b7d-5be9-74a8-854a-9e2c2b741b91","qty":"11985.000","qtyType":"string"}
+  [900-demo] DEBUG all-balances-before-insert cns-abyssinia-closed:receipt []
+  [900-demo] DEBUG cns-abyssinia-closed:receipt RECEIPT 11985.000 -> balance [{"quantity_kg":"11985.000","kesha_count":200}]
+  [900-demo] DEBUG about to issue lotId=b9b64702-f8db-7fd6-8683-255bf5061a06 section=46253b7d-5be9-74a8-854a-9e2c2b741b91 balance=[{"lot_id":"b9b64702-f8db-7fd6-8683-255bf5061a06","location_id":"46253b7d-5be9-74a8-854a-9e2c2b741b91","quantity_kg":"11985.000","kesha_count":200}]
+  [900-demo] DEBUG pre-insert cns-abyssinia-closed:issue {"id":"e2ef2bee-bfa7-72a1-8fff-c5e594c26e99","lotId":"b9b64702-f8db-7fd6-8683-255bf5061a06","locationId":"46253b7d-5be9-74a8-854a-9e2c2b741b91","qty":"-11985.000","qtyType":"string"}
+  [900-demo] DEBUG all-balances-before-insert cns-abyssinia-closed:issue [{"lot_id":"b9b64702-f8db-7fd6-8683-255bf5061a06","location_id":"46253b7d-5be9-74a8-854a-9e2c2b741b91","quantity_kg":"11985.000"}]
+
+✖ Seeding failed — the transaction was rolled back.
+
+DrizzleQueryError: Failed query: 
+    insert into public.stock_movement
+      (id, occurred_at, movement_type, lot_id, customer_id, consignment_id, location_id,
+       quantity_kg, kesha_count, bag_type_id, reason_code_id, source_type, source_id,
+       actor_id, narrative, correlation_id, created_by)
+    values
+      ($1, $2, $3, $4, $5,
+       $6, $7, $8, $9,
+       $10, $11, $12, $13,
+       $14, $15, $16, $17)
+    -- stock_movement is partitioned BY RANGE (occurred_at) (docs/adr, migration 0012), so its
+    -- actual primary key is the composite (id, occurred_at), not id alone.
+    on conflict (id, occurred_at) do nothing
+  
+params: e2ef2bee-bfa7-72a1-8fff-c5e594c26e99,Wed Mar 25 2026 05:10:00 GMT+0000 (Coordinated Universal Time),ISSUE_TO_JOB,b9b64702-f8db-7fd6-8683-255bf5061a06,09fe9e78-0d7b-7531-a531-1f56d6a38f52,ca4f80da-d377-74b0-8d71-1716ea207e55,46253b7d-5be9-74a8-854a-9e2c2b741b91,-11985.000,-200,019ffad4-bee4-781c-95a7-f8be2525d269,,job_order,1bfbbd03-bd18-7bb7-bde3-07fd2d2489f8,27c58088-ca93-71b5-90c4-fc9cee37c54f,,43f6faf3-d57b-74a4-8296-14f17794782a,27c58088-ca93-71b5-90c4-fc9cee37c54f
+    at PostgresJsPreparedQuery.queryWithCache (C:\Users\Admi n\my-project\ethiostart\node_modules\src\pg-core\session.ts:73:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async postStockMovement (C:\Users\Admi n\my-project\ethiostart\db\seeds\900-demo\util.ts:105:3)
+    at async runScenario (C:\Users\Admi n\my-project\ethiostart\db\seeds\900-demo\050-pipeline.ts:619:3)
+    at async seedPipeline (C:\Users\Admi n\my-project\ethiostart\db\seeds\900-demo\050-pipeline.ts:279:5)
+    at async Object.seedDemo (C:\Users\Admi n\my-project\ethiostart\db\seeds\900-demo\index.ts:40:3)
+    at async <anonymous> (C:\Users\Admi n\my-project\ethiostart\db\seeds\index.ts:86:9)
+    at async scope (C:\Users\Admi n\my-project\ethiostart\node_modules\postgres\cjs\src\index.js:260:18)
+    at async Function.begin (C:\Users\Admi n\my-project\ethiostart\node_modules\postgres\cjs\src\index.js:243:14)
+    at async main (C:\Users\Admi n\my-project\ethiostart\db\seeds\index.ts:72:5) {
+  query: '\n' +
+    '    insert into public.stock_movement\n' +
+    '      (id, occurred_at, movement_type, lot_id, customer_id, consignment_id, location_id,\n' +
+    '       quantity_kg, kesha_count, bag_type_id, reason_code_id, source_type, source_id,\n' +
+    '       actor_id, narrative, correlation_id, created_by)\n' +
+    '    values\n' +
+    '      ($1, $2, $3, $4, $5,\n' +
+    '       $6, $7, $8, $9,\n' +
+    '       $10, $11, $12, $13,\n' +
+    '       $14, $15, $16, $17)\n' +
+    '    -- stock_movement is partitioned BY RANGE (occurred_at) (docs/adr, migration 0012), so its\n' +
+    '    -- actual primary key is the composite (id, occurred_at), not id alone.\n' +
+    '    on conflict (id, occurred_at) do nothing\n' +
+    '  ',
+  params: [
+    'e2ef2bee-bfa7-72a1-8fff-c5e594c26e99',
+    2026-03-25T05:10:00.000Z,
+    'ISSUE_TO_JOB',
+    'b9b64702-f8db-7fd6-8683-255bf5061a06',
+    '09fe9e78-0d7b-7531-a531-1f56d6a38f52',
+    'ca4f80da-d377-74b0-8d71-1716ea207e55',
+    '46253b7d-5be9-74a8-854a-9e2c2b741b91',
+    '-11985.000',
+    -200,
+    '019ffad4-bee4-781c-95a7-f8be2525d269',
+    null,
+    'job_order',
+    '1bfbbd03-bd18-7bb7-bde3-07fd2d2489f8',
+    '27c58088-ca93-71b5-90c4-fc9cee37c54f',
+    null,
+    '43f6faf3-d57b-74a4-8296-14f17794782a',
+    '27c58088-ca93-71b5-90c4-fc9cee37c54f'
+  ],
+  cause: PostgresError: new row for relation "stock_balance" violates check constraint "ck_stock_balance__non_negative"
+      at ErrorResponse (C:\Users\Admi n\my-project\ethiostart\node_modules\postgres\cjs\src\connection.js:815:30)
+      at handle (C:\Users\Admi n\my-project\ethiostart\node_modules\postgres\cjs\src\connection.js:489:6)
+      at Socket.data (C:\Users\Admi n\my-project\ethiostart\node_modules\postgres\cjs\src\connection.js:324:9)
+      at Socket.emit (node:events:524:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:191:23) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '23514',
+    detail: 'Failing row contains (b9b64702-f8db-7fd6-8683-255bf5061a06, 46253b7d-5be9-74a8-854a-9e2c2b741b91, 09fe9e78-0d7b-7531-a531-1f56d6a38f52, ca4f80da-d377-74b0-8d71-1716ea207e55, 019ffad4-bee4-781c-95a7-f8be2525d269, -11985.000, -200, e2ef2bee-bfa7-72a1-8fff-c5e594c26e99, 2026-08-17 13:33:33.987611+00).',
+    where: 'SQL statement "INSERT INTO public.stock_balance AS b (\n' +
+      '    lot_id, location_id, customer_id, consignment_id, bag_type_id,\n' +
+      '    quantity_kg, kesha_count, last_movement_id, updated_at\n' +
+      '  ) VALUES (\n' +
+      '    NEW.lot_id, NEW.location_id, NEW.customer_id, NEW.consignment_id, NEW.bag_type_id,\n' +
+      '    NEW.quantity_kg, NEW.kesha_count, NEW.id, now()\n' +
+      '  )\n' +
+      '  ON CONFLICT (lot_id, location_id) DO UPDATE SET\n' +
+      '    quantity_kg      = b.quantity_kg + EXCLUDED.quantity_kg,\n' +
+      '    kesha_count      = b.kesha_count + EXCLUDED.kesha_count,\n' +
+      '    bag_type_id      = COALESCE(EXCLUDED.bag_type_id, b.bag_type_id),\n' +
+      '    last_movement_id = EXCLUDED.last_movement_id,\n' +
+      '    updated_at       = now()"\n' +
+      'PL/pgSQL function public.fn_apply_stock_movement() line 3 at SQL statement',
+    schema_name: 'public',
+    table_name: 'stock_balance',
+    constraint_name: 'ck_stock_balance__non_negative',
+    file: 'execMain.c',
+    line: '2033',
+    routine: 'ExecConstraints'
+  }
+}

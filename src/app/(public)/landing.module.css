@@ -1,0 +1,210 @@
+/**
+ * Landing-page visuals.
+ *
+ * Scoped to this one page on purpose. These are display effects — perspective decks,
+ * ambient light, float loops — and none of them belong in the shared design system, which is
+ * deliberately flat and low-elevation because operators read it for eight hours at a stretch.
+ * A marketing page is the one screen that is allowed to be theatrical.
+ *
+ * Everything is CSS. No canvas, no WebGL, no animation library: the 3D here is real CSS
+ * perspective on a handful of elements, which costs nothing, renders on the first paint, and
+ * degrades to a plain stack of cards on anything that cannot do transforms.
+ *
+ * Motion is handled globally — globals.css collapses every animation and transition under
+ * `prefers-reduced-motion: reduce`, so the float loops below stop for anyone who asks.
+ */
+
+/* ── Ambient light ──────────────────────────────────────────────────────────
+   Two out-of-focus colour washes behind the hero, in the brand green and the logo gold.
+   Heavily blurred and very low opacity, so they read as light in a room rather than as
+   shapes on a page. `pointer-events: none` because they overlap the copy. */
+.ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(72px);
+  opacity: 0.5;
+}
+
+.orbGreen {
+  width: 34rem;
+  height: 34rem;
+  top: -12rem;
+  right: -8rem;
+  background: radial-gradient(circle, var(--color-brand-300), transparent 68%);
+}
+
+.orbGold {
+  width: 26rem;
+  height: 26rem;
+  bottom: -10rem;
+  left: -6rem;
+  background: radial-gradient(circle, var(--color-gold-200), transparent 68%);
+  opacity: 0.6;
+}
+
+/* A dot grid, faded out radially so it never reaches an edge and never competes with text. */
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--color-neutral-300) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── The 3D deck ────────────────────────────────────────────────────────────
+   `perspective` lives on the scene and `preserve-3d` on the deck, so the layers inside share
+   one vanishing point instead of each faking their own. That is the difference between a
+   convincing stack and four separately-skewed rectangles. */
+.scene {
+  perspective: 1600px;
+  perspective-origin: 60% 40%;
+}
+
+.deck {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(9deg) rotateY(-19deg) rotateZ(2deg);
+  transition: transform 700ms var(--ease-out);
+}
+
+/* Straightens up as the pointer arrives — the deck "turns to face you". */
+.scene:hover .deck {
+  transform: rotateX(4deg) rotateY(-9deg) rotateZ(1deg);
+}
+
+.layer {
+  border-radius: var(--radius-xl);
+  background: var(--surface-raised);
+  box-shadow:
+    0 26px 50px -22px rgb(31 78 61 / 0.3),
+    0 10px 20px -12px rgb(34 34 34 / 0.16);
+  will-change: transform;
+}
+
+/* The main panel sits at the origin; the others are pushed fore and aft along Z. */
+.layerMain {
+  position: relative;
+  transform: translateZ(0);
+  animation: drift 7s ease-in-out infinite;
+}
+
+.layerBack {
+  position: absolute;
+  top: -2.25rem;
+  right: -1.5rem;
+  width: 78%;
+  transform: translateZ(-90px);
+  opacity: 0.75;
+  animation: drift 7s ease-in-out infinite;
+  animation-delay: -2.4s;
+}
+
+.layerFront {
+  position: absolute;
+  bottom: -1.75rem;
+  left: -2.25rem;
+  transform: translateZ(80px);
+  animation: drift 6s ease-in-out infinite;
+  animation-delay: -1.2s;
+}
+
+.layerPill {
+  position: absolute;
+  top: 1.5rem;
+  right: -2.75rem;
+  transform: translateZ(130px);
+  animation: drift 5.5s ease-in-out infinite;
+  animation-delay: -3.6s;
+}
+
+/* Small amplitude on purpose. A big float reads as a toy; 6px reads as weight. */
+@keyframes drift {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -6px;
+  }
+}
+
+/* ── Feature cards ──────────────────────────────────────────────────────────
+   A shallow lift plus a gradient hairline that only appears on hover, so the grid is calm at
+   rest and responds when addressed. */
+.feature {
+  position: relative;
+  transition:
+    transform 260ms var(--ease-out),
+    box-shadow 260ms var(--ease-out);
+}
+
+.feature::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--gradient-brand);
+  /* The standard gradient-border trick: paint the gradient, then punch out everything but
+     the 1px padding ring using a composited mask. Safari still needs the -webkit- pair, and
+     its compositing keyword is `xor` rather than `exclude`. */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 260ms var(--ease-out);
+  pointer-events: none;
+}
+
+.feature:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 34px -18px rgb(31 78 61 / 0.34);
+}
+
+.feature:hover::after {
+  opacity: 0.9;
+}
+
+/* ── Lifecycle rail ─────────────────────────────────────────────────────────
+   The connecting line is drawn behind the nodes and stops short of the last one, so the rail
+   reads as a sequence with an end rather than as a border that ran out. */
+.rail {
+  position: relative;
+}
+
+.rail::before {
+  content: '';
+  position: absolute;
+  top: 1.125rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-brand-200),
+    var(--color-brand-500),
+    var(--color-gold-400)
+  );
+  border-radius: 999px;
+}
+
+@media (max-width: 767px) {
+  .rail::before {
+    display: none;
+  }
+}

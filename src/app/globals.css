@@ -1,0 +1,319 @@
+@import 'tailwindcss';
+@import '../ui/styles/tokens.css';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Colour scheme — LIGHT ONLY
+   ═══════════════════════════════════════════════════════════════════════════
+   Tailwind's stock `dark:` variant fires on the OPERATING SYSTEM's setting, which
+   means anyone whose laptop is in dark mode gets a dark EthioStar whether or not
+   the product wants one. This redefinition moves the trigger to an explicit
+   `data-theme="dark"` attribute instead.
+
+   `<html>` is pinned to `data-theme="light"` in src/app/layout.tsx, so the
+   attribute is never present and every `dark:` utility is inert. The dark token
+   block in tokens.css is likewise guarded and stays dormant.
+
+   None of the dark styling has been deleted. There are 126 `dark:` utilities in
+   the codebase; ripping them out would be a large, lossy diff, and this way the
+   product decision is one attribute — flip `data-theme` to "dark" and the whole
+   scheme is back. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Amharic. Ethiopic glyphs have a taller x-height than Latin, so the same
+     nominal size reads larger — nudge it down to keep the rhythm. */
+  :lang(am),
+  [lang='am'] {
+    font-family: var(--font-ethiopic), var(--font-sans);
+    font-size: 0.95em;
+  }
+
+  /* Weights, kesha counts and document numbers are compared COLUMN-WISE. A
+     proportional figure in a stock table is genuinely harder to scan. */
+  .numeric,
+  td.numeric,
+  th.numeric {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--text-primary);
+    font-weight: 600;
+    letter-spacing: -0.011em;
+  }
+
+  /* One visible focus style everywhere. Keyboard operation matters here: the
+     receiving screen is driven by a barcode scanner that emits Tab. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  ::selection {
+    background: var(--color-brand-100);
+    color: var(--color-brand-900);
+  }
+
+  /* Scrollbars, so a dense table does not get a jarring OS-default bar. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong);
+    background-clip: content-box;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Utilities
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer utilities {
+  /* Content ceiling. Operational tables are wide; text is not. */
+  .container-app {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1rem;
+    max-width: 96rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-app {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .stack > * + * {
+    margin-top: var(--stack-gap, 1rem);
+  }
+
+  /* A subtle sheen used on the brand header and the sign-in panel. It reads as
+     depth without a gradient that fights the content. */
+  .surface-brand-gradient {
+    background:
+      radial-gradient(
+        ellipse 80% 60% at 20% 0%,
+        oklch(from var(--color-brand-600) l c h / 0.35),
+        transparent 60%
+      ),
+      linear-gradient(160deg, var(--color-brand-900), var(--color-brand-950));
+  }
+
+  /* Faint texture behind empty states and the sign-in page — coffee sacking,
+     abstracted. Pure CSS: no asset to load or forget to optimise.
+
+     Painted as an OVERLAY rather than as `background-image` on the element itself.
+     Both this and `.surface-brand-gradient` are single-class utilities in the same
+     layer, so the one declared later simply wins — and this one is declared later.
+     Setting `background-image` here therefore replaced the brand gradient outright
+     AND reset the shorthand's colour to transparent, which is why the sign-in panel
+     rendered as white text on a transparent panel. Invisible on a light page; merely
+     unnoticed while the app was following the OS into dark mode.
+
+     As a pseudo-element it composes with any background instead of fighting it. */
+  .texture-weave {
+    position: relative;
+  }
+
+  .texture-weave::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    /* Decorative only, and it sits over the content — but at 2% alpha that is
+       imperceptible, and this keeps it from swallowing clicks. */
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        oklch(from var(--color-neutral-0) l c h / 0.02) 0 2px,
+        transparent 2px 6px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        oklch(from var(--color-neutral-0) l c h / 0.02) 0 2px,
+        transparent 2px 6px
+      );
+  }
+
+  .animate-in {
+    animation: fade-rise 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes fade-rise {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Loading placeholder. The highlight is derived from the surface itself rather
+     than a fixed grey, so it shimmers correctly in dark mode instead of flashing
+     a light bar across a dark screen. */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--surface-sunken) 25%,
+      oklch(from var(--surface-sunken) calc(l + 0.06) c h) 37%,
+      var(--surface-sunken) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: var(--radius-sm);
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 100% 50%;
+    }
+    to {
+      background-position: 0 50%;
+    }
+  }
+
+  /* The one interactive-surface treatment: a card or tile that can be clicked
+     lifts very slightly and gains a brand-tinted edge. Applied through a single
+     class so "this is clickable" never drifts between screens. Translate is
+     capped at 1px — on a dense operational screen a bigger move reads as the
+     layout shifting under the pointer. */
+  .interactive-surface {
+    transition:
+      box-shadow var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .interactive-surface:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .interactive-surface:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-xs);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .interactive-surface:hover,
+    .interactive-surface:active {
+      transform: none;
+    }
+  }
+}
+
+/* Respect the user's motion preference — a store office screen left on all day
+   should not animate at someone. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Print — M06 requires every document to carry EthioStar's identity
+   ═══════════════════════════════════════════════════════════════════════════
+   Server-rendered PDFs are the authoritative artefact, but a browser print of a
+   worklist should still be legible and should not waste ink on chrome. */
+@media print {
+  :root {
+    --surface-page: #fff;
+    --surface-raised: #fff;
+    --text-primary: #000;
+    --text-secondary: #333;
+    --border-subtle: #ccc;
+    --border-default: #999;
+  }
+
+  body {
+    background: #fff;
+    font-size: 10pt;
+  }
+
+  .no-print,
+  nav[data-app-nav],
+  [data-app-topbar] {
+    display: none !important;
+  }
+
+  .print-only {
+    display: revert !important;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 8pt;
+    color: #555;
+  }
+
+  table {
+    break-inside: auto;
+  }
+
+  tr {
+    break-inside: avoid;
+    break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+}
+
+.print-only {
+  display: none;
+}

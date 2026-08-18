@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  # ── Fast gates: fail in under two minutes ─────────────────────────────────
+  static:
+    name: Typecheck · Lint · Boundaries · Guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint (no warnings permitted)
+        run: npx eslint . --max-warnings=0
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Module boundaries and cycles
+        run: npm run boundaries
+
+      # THE load-bearing security control: service_role bypasses RLS.
+      # See docs/adr/0013-supabase-as-database-platform.md
+      - name: service_role confinement
+        run: npm run guard:service-role
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Unit tests with coverage thresholds
+        run: npm run test:cov
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+  # ── Database: migrations must apply from zero, and the schema must not drift ──
+  database:
+    name: Migrations · Schema drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Apply all migrations from an empty database
+        run: supabase db reset --no-seed
+
+      # Catches schema changed through the dashboard rather than in a migration —
+      # Supabase makes that one click away and the drift is otherwise invisible.
+      - name: Drizzle schema drift
+        run: npm run db:check
+
+      - name: Seed (idempotent — runs on every deploy, so it is tested every build)
+        run: npm run db:seed
+        env:
+          NODE_ENV: test
+
+      - name: Seeds are idempotent (second run must be a no-op)
+        run: npm run db:seed
+        env:
+          NODE_ENV: test
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    needs: database
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase start
+      - run: supabase db reset --no-seed
+      - run: npm run db:seed
+        env:
+          NODE_ENV: test
+      - name: Integration tests (RLS isolation, ledger invariants, concurrency)
+        run: npm run test:int
+        env:
+          NODE_ENV: test
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          # Build-time placeholders; real values come from the deployment environment.
+          APP_URL: https://ci.invalid
+          DATABASE_URL: postgresql://postgres:postgres@localhost:6543/postgres
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key-value
+          SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+          ENCRYPTION_KEY: ci-placeholder-encryption-key-32chars
+          SMTP_HOST: localhost
+          MAIL_FROM: ci@ci.invalid
+
+      # The service-role key must never reach the browser bundle.
+      - name: Assert no service-role key in the client bundle
+        run: |
+          if grep -rq "ci-placeholder-service-role-key" .next/static/ 2>/dev/null; then
+            echo "::error::Service-role key found in the client bundle"
+            exit 1
+          fi
+          echo "OK — no service-role key in client bundle"
+
+  security:
+    name: Dependency audit · Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

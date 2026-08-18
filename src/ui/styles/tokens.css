@@ -1,0 +1,279 @@
+/**
+ * EthioStar CPMS — design tokens.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * THE BRAND VALUES BELOW ARE EXTRACTED FROM ETHIOSTAR'S OWN DOCUMENT, not invented.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Source: EthioStar_CPMS_Solution_Overview.pdf v1.0
+ *
+ *   #1F4E3D  deep green   — the document's heading colour and rule colour (2,915 characters
+ *                           of text, 75 drawn rules). This is the primary brand colour.
+ *   #8A5A2B  coffee brown — the document's secondary accent (468 characters).
+ *   #C9CB46  gold         — the terminus of the logo's gradient.
+ *   #222222  body text · #888888 muted text · #D9D9D9/#F2F2F2/#BFBFBF table greys.
+ *
+ * The logo (public/brand/ethiostar-logo.png) is an "ES" monogram forming a coffee bean,
+ * running a gradient from deep green through to that gold. The palette is built around
+ * that gradient so the interface and the mark read as one system.
+ *
+ * Each scale is a perceptually-even lightness ramp with the EXACT EthioStar value placed at
+ * whichever slot its true lightness occupies — so the real colour is always present and the
+ * ramp stays monotonic. Those slots are marked below.
+ *
+ * ── Constraints that shaped the rest, all from the client document ──────────
+ *   • The receiving bay and gate screens run on cheap tablets in bright sunlight, so
+ *     contrast is AA minimum and AAA for numeric data.
+ *   • Status is the primary signal: twelve consignment lifecycle states, read at a glance
+ *     across a dense table.
+ *   • Amharic is a first-class locale; the type scale must hold with Ethiopic glyphs, whose
+ *     x-height runs taller than Latin.
+ *   • M06 prints these screens, so nothing may depend on colour alone.
+ */
+
+@theme {
+  /* ── Brand green — EthioStar #1F4E3D ──────────────────────────────────── */
+  --color-brand-50: #f4f8f7;
+  --color-brand-100: #e7f1ed;
+  --color-brand-200: #d0e4dd;
+  --color-brand-300: #aed3c6;
+  --color-brand-400: #83c1aa;
+  --color-brand-500: #5bb192;
+  --color-brand-600: #449779;
+  --color-brand-700: #357b62;
+  --color-brand-800: #27604b;
+  --color-brand-900: #1f4e3d; /* ← EthioStar document heading green */
+  --color-brand-950: #143126;
+
+  /* ── Coffee brown — EthioStar #8A5A2B ─────────────────────────────────── */
+  --color-coffee-50: #f9f6f3;
+  --color-coffee-100: #f3ece5;
+  --color-coffee-200: #e8dacc;
+  --color-coffee-300: #dac0a7;
+  --color-coffee-400: #cba179;
+  --color-coffee-500: #c0854c;
+  --color-coffee-600: #a56d36;
+  --color-coffee-700: #8a5a2b; /* ← EthioStar document accent */
+  --color-coffee-800: #654322;
+  --color-coffee-900: #4b331b;
+  --color-coffee-950: #322213;
+
+  /* ── Gold — EthioStar #C9CB46, the logo gradient terminus ─────────────── */
+  --color-gold-50: #fafaf2;
+  --color-gold-100: #f4f4e3;
+  --color-gold-200: #ebebc9;
+  --color-gold-300: #dedfa2;
+  --color-gold-400: #d2d371;
+  --color-gold-500: #c9cb46; /* ← EthioStar logo gold */
+  --color-gold-600: #a6a834;
+  --color-gold-700: #83842c;
+  --color-gold-800: #636423;
+  --color-gold-900: #4a4a1c;
+  --color-gold-950: #313113;
+
+  /* ── Neutrals — warm, matching the document's greys ───────────────────── */
+  --color-neutral-0: #ffffff;
+  --color-neutral-25: #fcfcfb;
+  --color-neutral-50: #f9f9f8;
+  --color-neutral-100: #f2f2f2; /* ← document table fill */
+  --color-neutral-200: #e4e4e2;
+  --color-neutral-300: #d9d9d9; /* ← document table border */
+  --color-neutral-400: #bfbfbf; /* ← document rule */
+  --color-neutral-500: #888888; /* ← document muted text */
+  --color-neutral-600: #6b6b6b;
+  --color-neutral-700: #555555;
+  --color-neutral-800: #3a3a3a;
+  --color-neutral-900: #222222; /* ← document body text */
+  --color-neutral-950: #141414;
+
+  /* ── Semantic ───────────────────────────────────────────────────────────
+     Distinct in hue AND lightness, so they survive greyscale printing and the
+     common colour-vision deficiencies. Success borrows the brand green so a
+     healthy state feels like EthioStar rather than a generic UI green. */
+  --color-success-50: #eef7f2;
+  --color-success-100: #d6ebe0;
+  --color-success-500: #3c9a72;
+  --color-success-700: #24704f;
+  --color-success-900: #1a4b36;
+
+  --color-warning-50: #fdf6e8;
+  --color-warning-100: #f9e9c4;
+  --color-warning-500: #d99b1f;
+  --color-warning-700: #9a6a10;
+  --color-warning-900: #63450b;
+
+  --color-danger-50: #fdf1ef;
+  --color-danger-100: #f8dcd7;
+  --color-danger-500: #cf4632;
+  --color-danger-700: #9c3122;
+  --color-danger-900: #662117;
+
+  --color-info-50: #eef4fa;
+  --color-info-100: #d6e6f4;
+  --color-info-500: #3d7fb8;
+  --color-info-700: #2b5c88;
+  --color-info-900: #1d3e5c;
+
+  /* ── Type ───────────────────────────────────────────────────────────────
+     The source document is set in Calibri; Noto Sans is its closest widely
+     available humanist equivalent and carries the Ethiopic range we need.
+
+     `numeric` is not decoration: weights, kesha counts and document numbers are
+     compared COLUMN-WISE, and a proportional figure in a stock table is
+     genuinely harder to scan. */
+  --font-sans: var(--font-sans), 'Noto Sans', Calibri, system-ui, sans-serif;
+  --font-ethiopic: var(--font-ethiopic), 'Noto Sans Ethiopic', sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.375rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.125rem;
+  --text-xl--line-height: 1.625rem;
+  --text-2xl: 1.375rem;
+  --text-2xl--line-height: 1.875rem;
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 2.125rem;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+
+  /* Restrained radii. A custody system should read as precise, not friendly. */
+  --radius-xs: 0.1875rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  /* Elevation: low and warm-tinted, never a cold grey drop shadow. */
+  --shadow-xs: 0 1px 2px 0 rgb(34 34 34 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(34 34 34 / 0.08), 0 1px 2px -1px rgb(34 34 34 / 0.06);
+  --shadow-md: 0 4px 8px -2px rgb(34 34 34 / 0.08), 0 2px 4px -2px rgb(34 34 34 / 0.05);
+  --shadow-lg: 0 12px 20px -6px rgb(34 34 34 / 0.1), 0 4px 8px -4px rgb(34 34 34 / 0.06);
+
+  /* Touch targets for the bay and the gate. 44px is the accessibility floor;
+     these screens are used one-handed, sometimes in gloves, in bright light. */
+  --size-touch: 2.75rem;
+  --size-touch-lg: 3.25rem;
+
+  /* Motion. One easing curve and three durations, so a hover, a drawer and a
+     menu all feel like the same piece of software. `--ease-out` decelerates
+     hard, which reads as responsive rather than floaty. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 280ms;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Semantic surface tokens
+   ═══════════════════════════════════════════════════════════════════════════
+   Components reference THESE, never a numbered scale value, so dark mode is a
+   token swap rather than a class-by-class rewrite. */
+:root {
+  --surface-page: var(--color-neutral-50);
+  --surface-raised: var(--color-neutral-0);
+  --surface-sunken: var(--color-neutral-100);
+  --surface-inverse: var(--color-neutral-900);
+  --surface-brand: var(--color-brand-900);
+  /* Menus and popovers float above the page rather than sitting on it, so they
+     get their own surface — on dark it is LIGHTER than --surface-raised, which
+     is how elevation reads when a drop shadow no longer can. */
+  --surface-overlay: var(--color-neutral-0);
+  /* The one hover wash. Every row, nav item and ghost button uses it, so
+     "hoverable" looks identical everywhere. */
+  --surface-hover: var(--color-neutral-100);
+
+  --text-primary: var(--color-neutral-900);
+  --text-secondary: var(--color-neutral-600);
+  --text-tertiary: var(--color-neutral-500);
+  --text-inverse: var(--color-neutral-0);
+  --text-brand: var(--color-brand-900);
+
+  --border-subtle: var(--color-neutral-200);
+  --border-default: var(--color-neutral-300);
+  --border-strong: var(--color-neutral-400);
+  --border-brand: var(--color-brand-700);
+
+  --focus-ring: var(--color-brand-700);
+
+  /* The logo gradient, reused for brand furniture: the sign-in panel, the
+     collapsed nav rail, and the accent line under the app header. */
+  --gradient-brand: linear-gradient(135deg, #1f4e3d 0%, #357b62 45%, #c9cb46 140%);
+  --gradient-brand-subtle: linear-gradient(135deg, #1f4e3d 0%, #27604b 60%, #83842c 130%);
+}
+
+/* ── Dark ───────────────────────────────────────────────────────────────────
+   The two blocks below are IDENTICAL and must stay that way. They cannot be
+   merged into one selector list: the first is conditional on a media query and
+   the second on an attribute, and CSS has no way to say "either" across that
+   boundary. Plain CSS with no preprocessor is a deliberate choice here, so the
+   duplication is the honest cost of it — change one, change the other.
+
+   Note what dark mode does to elevation: a near-black drop shadow is invisible
+   on a near-black surface, so depth is carried by LIGHTER surfaces instead
+   (--surface-overlay sits above --surface-raised) with the shadow reduced to a
+   contact edge. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --surface-page: #121412;
+    --surface-raised: #1a1d1b;
+    --surface-sunken: #0e100f;
+    --surface-inverse: var(--color-neutral-100);
+    --surface-brand: var(--color-brand-950);
+    --surface-overlay: #232624;
+    --surface-hover: #222624;
+
+    --text-primary: #ececea;
+    --text-secondary: #a8a8a4;
+    --text-tertiary: #888888;
+    --text-inverse: var(--color-neutral-900);
+    --text-brand: var(--color-brand-300);
+
+    --border-subtle: #292d2b;
+    --border-default: #363a38;
+    --border-strong: #4a4f4c;
+    --border-brand: var(--color-brand-600);
+
+    --focus-ring: var(--color-brand-400);
+
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+    --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.55), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 12px 20px -6px rgb(0 0 0 / 0.65), 0 4px 8px -4px rgb(0 0 0 / 0.5);
+  }
+}
+
+:root[data-theme='dark'] {
+  --surface-page: #121412;
+  --surface-raised: #1a1d1b;
+  --surface-sunken: #0e100f;
+  --surface-inverse: var(--color-neutral-100);
+  --surface-brand: var(--color-brand-950);
+  --surface-overlay: #232624;
+  --surface-hover: #222624;
+
+  --text-primary: #ececea;
+  --text-secondary: #a8a8a4;
+  --text-tertiary: #888888;
+  --text-inverse: var(--color-neutral-900);
+  --text-brand: var(--color-brand-300);
+
+  --border-subtle: #292d2b;
+  --border-default: #363a38;
+  --border-strong: #4a4f4c;
+  --border-brand: var(--color-brand-600);
+
+  --focus-ring: var(--color-brand-400);
+
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.55), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 20px -6px rgb(0 0 0 / 0.65), 0 4px 8px -4px rgb(0 0 0 / 0.5);
+}

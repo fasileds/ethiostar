@@ -1,0 +1,68 @@
+/**
+ * Sign-in visuals.
+ *
+ * The same ambient-light treatment as the landing page, so the screen a customer sees after
+ * clicking "Sign in" belongs to the same product as the one they clicked it from. Scoped to
+ * this route group rather than shared, because it is presentation for two marketing-adjacent
+ * screens and has no business in the operational design system.
+ */
+
+.ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(80px);
+}
+
+.orbGreen {
+  width: 36rem;
+  height: 36rem;
+  top: -14rem;
+  left: -10rem;
+  background: radial-gradient(circle, var(--color-brand-300), transparent 68%);
+  opacity: 0.45;
+}
+
+.orbGold {
+  width: 28rem;
+  height: 28rem;
+  right: -8rem;
+  bottom: -10rem;
+  background: radial-gradient(circle, var(--color-gold-200), transparent 68%);
+  opacity: 0.55;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--color-neutral-300) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, #000 10%, transparent 72%);
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, #000 10%, transparent 72%);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* The form card.
+   A gradient hairline across the top edge, drawn as a pseudo-element so it follows the
+   card's radius instead of squaring off the corners the way a `border-top` would. */
+.card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: var(--gradient-brand);
+}

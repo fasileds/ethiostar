@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
   },
 
   // Small production image; no node_modules copy. Disable when deploying to Vercel.
-  output: process.env.VERCEL ? undefined : 'standalone',
+  ...(process.env.VERCEL ? {} : { output: 'standalone' as const }),
 
   // Stable in Next 16 — catches broken internal links at build time.
   typedRoutes: true,

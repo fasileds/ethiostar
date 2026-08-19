@@ -125,7 +125,10 @@ function build(config: LoggerConfig): pino.Logger {
       level: (label) => ({ level: label }),
       log: (object) => redact(object) as Record<string, unknown>,
     },
-    ...(config.pretty
+    // pino-pretty is a devDependency and is not installed on Vercel/production.
+    // Guard behind both the pretty flag AND non-production env so the bundler
+    // can eliminate this branch entirely at build time.
+    ...(config.pretty && process.env.NODE_ENV !== 'production'
       ? { transport: { target: 'pino-pretty', options: { colorize: true, singleLine: false } } }
       : {}),
   })
